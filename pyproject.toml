@@ -1,0 +1,55 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "triagemcp"
+version = "0.1.0"
+description = "MCP server that exposes Triage (the meta-scheduler) as agent tools."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+authors = [
+  { name = "Aaron K. Clark", email = "akclark@thenetwerk.net" },
+]
+keywords = ["mcp", "triage", "task-management", "priority-queue", "claude", "agent-tools"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: POSIX",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development",
+]
+dependencies = [
+  "mcp>=1.0.0",
+  "triage-scheduler>=0.9.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/CryptoJones/TriageMCP"
+Repository = "https://github.com/CryptoJones/TriageMCP"
+Mirror = "https://codeberg.org/CryptoJones/TriageMCP"
+Issues = "https://github.com/CryptoJones/TriageMCP/issues"
+Triage = "https://github.com/CryptoJones/Triage"
+"Nebraska Footer" = "https://xkcd.com/2347/"
+
+[project.scripts]
+triagemcp = "triagemcp.server:main"
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7",
+  "pytest-asyncio>=0.23",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/triagemcp"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+asyncio_mode = "auto"
