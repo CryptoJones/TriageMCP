@@ -57,6 +57,27 @@ async def status() -> dict:
     return await tools.status()
 
 
+@mcp.tool()
+async def doctor() -> dict:
+    """Read-only env diagnostics: Triage version, Python version, resolved
+    locale + source signal, store path, locale-catalog drift count.
+    Useful for self-diagnosis before issuing commands.
+    """
+    return await tools.doctor()
+
+
+@mcp.tool()
+async def lang_check() -> dict:
+    """Audit every non-English locale against the English baseline.
+
+    Returns `{ok, clean: bool, drift_count: int, report: {...}}`. Use
+    `clean` for a quick health check before relying on translated
+    output; `report` has per-locale missing/extra/placeholder-mismatch
+    details if drift is present.
+    """
+    return await tools.lang_check()
+
+
 # ---------- write tools ----------
 
 @mcp.tool()
