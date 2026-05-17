@@ -65,6 +65,8 @@ can reason about it:
 | `remove_task` | write | `triage rm` | confirms removal |
 | `tick` | write | `triage tick` | recomputes priorities; returns new top-3 + signal counts |
 | `inject_signal` | write | `triage signal manual` | writes a manual signal that `rule_manual_bump` picks up |
+| `doctor` | read | `triage doctor` | env diagnostics dict (version, python, locale + source signal, store path, drift count) |
+| `lang_check` | read | `triage lang --check` | `{clean, drift_count, report}` — empty `report` means all locales match the English baseline |
 
 The agent works on the same `~/.triage` store the
 [Triage CLI](https://github.com/CryptoJones/Triage) does — so anything
@@ -176,6 +178,7 @@ arrays the tools return. No black box.
 | Version | Feature | Status |
 |---------|---------|--------|
 | v0.1 | eight tools (list / get / why / status / add / remove / tick / inject_signal); direct in-process import of `triage`; matching tests for each | shipped |
+| v0.2 | two new read tools mirroring Triage v0.11's CLI surface: `doctor` (env diagnostics) + `lang_check` (locale-catalog audit) | shipped |
 | v0.2 | streaming watch via `triage watch` mode once Triage ships that (v0.10 milestone) | planned |
 | v0.3 | per-task `update_task` partial-edit tool (description / base_score / tags only — id stays stable) | planned |
 | v0.4 | Dockerfile parity with [KaliMCP](https://github.com/CryptoJones/KaliMCP) so the server can run in a sealed image | planned |

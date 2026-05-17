@@ -223,6 +223,58 @@ def test_server_module_imports():
     assert hasattr(server, "mcp")
     # Every @mcp.tool() function should be registered
     expected = {"list_tasks", "get_task", "why_task", "status",
-                "add_task", "remove_task", "tick", "inject_signal"}
+                "add_task", "remove_task", "tick", "inject_signal",
+                "doctor", "lang_check"}
     declared = {name for name in dir(server) if name in expected}
     assert declared == expected
+
+
+# ---------- doctor ----------
+
+@pytest.mark.asyncio
+async def test_doctor_returns_structured_diagnostics(tmp_path, monkeypatch):
+    monkeypatch.setenv("TRIAGEMCP_HOME", str(tmp_path))
+    monkeypatch.delenv("TRIAGE_LANG", raising=False)
+    r = await tools.doctor()
+    assert r["ok"] is True
+    assert "version" in r
+    assert "python" in r
+    assert r["store"]["path"] == str(tmp_path)
+    assert isinstance(r["locale"]["resolved"], str)
+    assert r["locale"]["drift"] == 0
+    assert r["locale"]["available"] >= 17
+
+
+@pytest.mark.asyncio
+async def test_doctor_reports_explicit_triage_lang_source(tmp_path, monkeypatch):
+    monkeypatch.setenv("TRIAGEMCP_HOME", str(tmp_path))
+    monkeypatch.setenv("TRIAGE_LANG", "fr")
+    r = await tools.doctor()
+    assert r["ok"] is True
+    assert r["locale"]["source"] == "TRIAGE_LANG"
+
+
+# ---------- lang_check ----------
+
+@pytest.mark.asyncio
+async def test_lang_check_reports_clean_on_shipping_catalogs():
+    r = await tools.lang_check()
+    assert r["ok"] is True
+    assert r["clean"] is True
+    assert r["drift_count"] == 0
+    assert r["report"] == {}
+
+
+@pytest.mark.asyncio
+async def test_lang_check_reports_drift_when_catalog_broken(monkeypatch):
+    from triage.locales import LOCALES
+    fake = {"__native_name__": "Test", "(no tasks)": "(none)"}
+    monkeypatch.setitem(LOCALES, "zz", fake)
+    try:
+        r = await tools.lang_check()
+        assert r["ok"] is True
+        assert r["clean"] is False
+        assert r["drift_count"] >= 1
+        assert "zz" in r["report"]
+    finally:
+        LOCALES.pop("zz", None)

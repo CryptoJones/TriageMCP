@@ -203,6 +203,90 @@ async def tick() -> dict[str, Any]:
     }
 
 
+async def doctor() -> dict[str, Any]:
+    """Read-only env diagnostics: version, locale, store path, drift count.
+
+    Same surface as the `triage doctor` CLI subcommand, returned as a
+    structured dict instead of formatted text. Useful for agents that
+    need to self-diagnose ("am I talking to the right Triage version
+    and locale?") before issuing commands.
+    """
+    try:
+        from triage import __version__ as triage_version
+        from triage import i18n
+        from triage.store import default_root
+    except ImportError as exc:
+        return {"ok": False, "error": f"triage import failed: {exc}"}
+
+    import sys as _sys
+
+    store_root = default_root()
+    home_override = os.environ.get("TRIAGEMCP_HOME") or os.environ.get("TRIAGE_HOME")
+    if home_override:
+        from pathlib import Path as _Path
+        store_root = _Path(home_override)
+
+    drift = i18n.check_locales()
+    available = len(i18n.list_available())
+
+    # Mirror cli.py's _detect_locale_source precedence so agent + CLI
+    # report the same "winning signal" name.
+    if os.environ.get("TRIAGE_LANG"):
+        source = "TRIAGE_LANG"
+    else:
+        source = "default"
+        for var in ("LC_ALL", "LC_MESSAGES", "LANG"):
+            v = os.environ.get(var)
+            if v and v != "C" and v != "POSIX":
+                source = var
+                break
+        if source == "default":
+            try:
+                import locale as _locale
+                if _locale.getlocale()[0]:
+                    source = "locale.getlocale()"
+            except Exception:
+                pass
+
+    return {
+        "ok": True,
+        "version": triage_version,
+        "python": f"{_sys.version_info.major}.{_sys.version_info.minor}.{_sys.version_info.micro}",
+        "locale": {
+            "resolved": i18n.current_lang(),
+            "source": source,
+            "available": available,
+            "drift": len(drift),
+        },
+        "store": {
+            "path": str(store_root),
+            "exists": store_root.exists(),
+        },
+    }
+
+
+async def lang_check() -> dict[str, Any]:
+    """Audit every non-English locale against the English baseline.
+
+    Returns the same drift report shape as `triage lang --check --json`:
+    a dict keyed by locale code with missing-keys / extra-keys /
+    placeholder-mismatch entries. Empty dict means all locales clean.
+    Includes a `clean` boolean for quick agent decisions.
+    """
+    try:
+        from triage import i18n
+    except ImportError as exc:
+        return {"ok": False, "error": f"triage import failed: {exc}"}
+
+    report = i18n.check_locales()
+    return {
+        "ok": True,
+        "clean": not report,
+        "drift_count": len(report),
+        "report": report,
+    }
+
+
 async def inject_signal(
     *,
     source: str,
