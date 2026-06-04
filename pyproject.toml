@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "triagemcp"
-version = "0.1.0"
+version = "0.2.0"
 description = "MCP server that exposes Triage (the meta-scheduler) as agent tools."
 readme = "README.md"
 requires-python = ">=3.11"
