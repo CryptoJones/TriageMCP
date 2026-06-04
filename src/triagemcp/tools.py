@@ -21,7 +21,7 @@ exceptions.
 from __future__ import annotations
 
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 # These are imported once at module load. If `triage-scheduler` isn't
@@ -309,7 +309,7 @@ async def inject_signal(
         payload["state"] = state
     sig = Signal(
         source=source,
-        captured_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        captured_at=datetime.now(UTC).isoformat(timespec="seconds"),
         payload=payload,
         affects=list(affects or []),
         ttl_seconds=int(ttl_seconds or 1800),

@@ -106,7 +106,7 @@ Edit (or create) `~/.claude/mcp.json`:
 }
 ```
 
-Restart Claude Code. The eight tools above will be available to the
+Restart Claude Code. The ten tools above will be available to the
 agent. Ask it to **"what should I do next?"** and it can call
 `list_tasks` + `why_task` to give you a real answer.
 
@@ -182,6 +182,26 @@ arrays the tools return. No black box.
 | v0.2 | streaming watch via `triage watch` mode once Triage ships that (v0.10 milestone) | planned |
 | v0.3 | per-task `update_task` partial-edit tool (description / base_score / tags only — id stays stable) | planned |
 | v0.4 | Dockerfile parity with [KaliMCP](https://github.com/CryptoJones/KaliMCP) so the server can run in a sealed image | planned |
+
+See [CHANGELOG.md](CHANGELOG.md) for per-release detail.
+
+---
+
+## Development
+
+```bash
+# Triage must be importable (TriageMCP calls it in-process, no subprocess)
+git clone https://github.com/CryptoJones/Triage.git && pip install -e ./Triage
+git clone https://github.com/CryptoJones/TriageMCP.git && cd TriageMCP
+pip install -e '.[dev]'
+
+ruff check src/ tests/   # lint (E, F, W, B, I, UP)
+mypy                     # type check
+pip-audit                # dependency CVE scan
+pytest -v                # tests
+```
+
+CI (GitHub Actions + Woodpecker) runs all four on Python 3.11 and 3.12.
 
 ---
 
