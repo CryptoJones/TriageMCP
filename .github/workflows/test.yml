@@ -19,11 +19,19 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Upgrade pip
+        run: python -m pip install -U pip
       - name: Install Triage (sibling repo, editable)
         run: |
           git clone --depth=1 https://github.com/CryptoJones/Triage.git ../triage-src
           pip install -e ../triage-src
       - name: Install TriageMCP
         run: pip install -e '.[dev]'
+      - name: Lint
+        run: ruff check src/ tests/
+      - name: Type check
+        run: mypy
+      - name: Audit dependencies
+        run: pip-audit
       - name: Run tests
         run: pytest -v

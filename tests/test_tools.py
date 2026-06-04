@@ -128,7 +128,7 @@ async def test_why_returns_contributions():
 @pytest.mark.asyncio
 async def test_why_blocker_propagation_visible():
     blocker = await tools.add_task(subject="block", base_score=1)
-    blocked = await tools.add_task(
+    await tools.add_task(
         subject="blocked", base_score=100, blocked_by=[blocker["task"]["id"]]
     )
     r = await tools.why_task(task_id=blocker["task"]["id"])
@@ -187,7 +187,7 @@ async def test_status_returns_summary():
 @pytest.mark.asyncio
 async def test_inject_signal_bumps_targeted_task():
     bumped = await tools.add_task(subject="bumped", base_score=1)
-    calm = await tools.add_task(subject="calm", base_score=10)
+    await tools.add_task(subject="calm", base_score=10)
     r = await tools.inject_signal(
         source="operator",
         bump=100,
